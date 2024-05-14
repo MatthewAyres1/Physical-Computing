@@ -1,0 +1,67 @@
+#include <Servo.h>
+
+Servo myservo; // Servo for latitude
+Servo myservo2; // Servo for longitude
+
+const int numCountries = 39;
+const char* countries[numCountries] = { "0", "180", "United Kingdom", "Ireland", "Norway", "Denmark", "Iceland", "Finland", "Estonia", "Latvia", "Lithuania", "Belarus", "Netherlands", "Belgium", "Luxembourg", "France", "Germany", "Liechtenstein", "Austria", "Czechia", "Poland", "Slovakia", "Hungary", "Slovenia", "Italy", "Switzerland", "Monaco", "Croatia", "Bosnia and Herzegovina", "Serbia", "Montenegro", "Albania", "North Macedonia", "Bulgaria", "Greece", "Romania", "Moldova", "Ukraine", "Russia" };
+
+const int latitudes[numCountries] = { 0, 180, 80, 55, 55, 70, 0, 55, 65, 70, 75, 70, 80, 80, 90, 90, 120, 90, 110, 105, 110, 90, 100, 110, 150, 100, 110, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180 };
+const int longitudes[numCountries] = { 0, 180, 80, 60, 100, 100, 60, 130, 130, 125, 120, 135, 90, 80, 90, 70, 100, 100, 110, 120, 130, 130, 120, 100, 100, 10, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180 };
+
+float latitudeMult = 0.15;
+float longitudeMult = 0.25;
+
+void setup() {
+  myservo.attach(9);
+  myservo2.attach(10);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available()) {
+    String input = Serial.readStringUntil('\n');
+    input.trim();
+
+    if (input.startsWith("i ")) {
+      int spaceIndex = input.indexOf(' ', 2);
+      if (spaceIndex != -1) {
+        int latitude = input.substring(2, spaceIndex).toInt();
+        int longitude = input.substring(spaceIndex + 1).toInt();
+
+        int latAngle = latitude * latitudeMult;
+        int longAngle = longitude * longitudeMult;
+
+        myservo2.write(latAngle);
+        myservo.write(180 - longAngle);
+
+        Serial.print("Servo angles set to ");
+        Serial.print(longAngle);
+        Serial.print(" (longitude), ");
+        Serial.print(latAngle);
+        Serial.println(" (latitude).");
+      } else {
+        Serial.println("Invalid input format. Use 'i latitude longitude'.");
+      }
+    } else {
+      for (int i = 0; i < numCountries; ++i) {
+        if (input.equalsIgnoreCase(countries[i])) {
+          int latitude = latitudes[i];
+          int longitude = longitudes[i];
+          int latAngle = latitude * latitudeMult;
+          int longAngle = longitude * longitudeMult;
+
+          myservo2.write(latAngle);
+          myservo.write(180 - longAngle);
+
+          Serial.print("Servo angles set to ");
+          Serial.print(longAngle);
+          Serial.print(" (longitude), ");
+          Serial.print(latAngle);
+          Serial.println(" (latitude).");
+          break;
+        }
+      }
+    }
+  }
+}
