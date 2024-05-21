@@ -1,0 +1,18 @@
+#include <Stepper.h>
+const int stepSize = 250;
+Stepper myStepper(stepSIze, 8, 9, 10, 11);
+
+int stepCount = 0;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  myStepper.step(1);
+  Serial.print("Steps Done:");
+  Serial.println(stepCount);
+  stepCount++;
+  delay(250);
+}
+
